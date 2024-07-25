@@ -1,0 +1,114 @@
+name: Build and Push Container Image
+run-name: "Build and Push Image: Kubectl ${{ inputs.kubectl-version }}, Helm ${{ inputs.helm-version }}, Powershell ${{ inputs.powershell-version }}"
+
+on:
+  workflow_dispatch:
+    inputs:
+      kubectl-version:
+        required: true
+        type: string
+        default: "1.29.3"
+      helm-version:
+        required: true
+        type: string
+        default: "3.14.3"
+      powershell-version:
+        required: true
+        type: string
+        default: "7.4.1"
+      tag-as-latest:
+        description: "(Main only) Tag the image as latest."
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log Inputs
+        run: |
+            echo "Kubectl Version: ${{ inputs.kubectl-version }}"
+            echo "Helm Version: ${{ inputs.helm-version }}"
+
+      - uses: actions/checkout@v4
+        with:
+            fetch-depth: 0
+
+      - name: Get branch names
+        id: branch_names
+        uses: OctopusDeploy/util-actions/current-branch-name@current-branch-name.0.1.0
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Artifactory
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}
+          username: ${{ secrets.ARTIFACTORY_USERNAME }}
+          password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        # Only log into Dockerhub on when using main branch
+        if: ${{ github.ref == 'refs/heads/main' }}
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Create Tag Version
+        run: |
+          fullVersion="${{ inputs.kubectl-version }}"
+          if [[ "${{steps.branch_names.outputs.branch_name}}" != "main" ]]
+            then
+            preRelease="-${{steps.branch_names.outputs.branch_name}}-$(date +'%Y%m%d%H%M%S')"
+          fi
+
+          tagVersion="${fullVersion%'.'*}$preRelease";
+          echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
+          echo "tagVersion=$tagVersion";
+        id: createTagVersion
+      
+      - name: Build and push for test
+        if: ${{ github.ref != 'refs/heads/main' }}
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }}"
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            "KUBECTL_VERSION=${{ inputs.kubectl-version }}"
+            "HELM_VERSION=${{ inputs.helm-version }}"
+            "POWERSHELL_VERSION=${{ inputs.powershell-version }}"
+
+      - name: Create production docker tags
+        if: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          artifactoryTags="${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }}"
+          dockerhubTags="octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }}"
+
+          if [[ "${{ inputs.tag-as-latest }}" == "true" ]]
+            then
+            artifactoryTags="$artifactoryTags,${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:latest"
+            dockerhubTags="$dockerhubTags,octopusdeploy/kubernetes-agent-tools-base:latest"
+          fi
+
+          dockerTags="$artifactoryTags,$dockerhubTags"
+          echo "dockerTags=$dockerTags" >> $GITHUB_OUTPUT;
+          echo "dockerTags=$dockerTags";
+        id: createProductionDockerTags
+
+    
+      - name: Build and push for production
+        if: ${{ github.ref == 'refs/heads/main' }}
+        uses: docker/build-push-action@v5
+        with:
+          push: true
+          tags: ${{ steps.createProductionDockerTags.outputs.dockerTags }}
+          platforms: linux/amd64,linux/arm64
+          build-args: |
+            "KUBECTL_VERSION=${{ inputs.kubectl-version }}"
+            "HELM_VERSION=${{ inputs.helm-version }}"
+            "POWERSHELL_VERSION=${{ inputs.powershell-version }}"
