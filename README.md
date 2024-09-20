@@ -2,7 +2,7 @@
 
 This repo produces a container image that is used by the Kubernetes Agent to execute Kubernetes scripts. It contains the minimum required tooling to run Kubernetes workloads for Octopus Deploy.
 
-Summary: The image packages `kubectl`, `helm` and `powershell` on the base image `mcr.microsoft.com/dotnet/runtime-deps`.
+Summary: The image packages `kubectl`, `helm`, `powershell` and `curl` on the base image `mcr.microsoft.com/dotnet/runtime-deps`.
 
 # Building and Pushing a image
 Currently this is mostly a manual process which involves dispatching `build-and-publish-container-image` github workflow.
