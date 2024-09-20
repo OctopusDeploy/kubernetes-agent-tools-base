@@ -7,17 +7,17 @@ on:
       kubectl-version:
         required: true
         type: string
-        default: "1.29.3"
+        default: "1.30.5"
       helm-version:
         required: true
         type: string
-        default: "3.14.3"
+        default: "3.16.1"
       powershell-version:
         required: true
         type: string
-        default: "7.4.1"
+        default: "7.4.5"
       tag-as-latest:
-        description: "(Main only) Tag the image as latest."
+        description: "(Main only) Tag the image as latest - kubectl 1.30.x only"
         required: true
         type: boolean
         default: false
