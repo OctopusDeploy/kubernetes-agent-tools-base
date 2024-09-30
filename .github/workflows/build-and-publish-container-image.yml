@@ -46,6 +46,10 @@ jobs:
     strategy:
       matrix: ${{ fromJSON(needs.versions.outputs.toolsVersions) }}
 
+    env:
+      ArtifactoryImagePath: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base"
+      DockerHubImagePath: "octopusdeploy/kubernetes-agent-tools-base"
+
     steps:
       - name: Log Inputs
         run: |
@@ -111,7 +115,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }},${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
+          tags: "$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.tagVersion }},$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
           platforms: linux/amd64,linux/arm64
           build-args: |
             "KUBECTL_VERSION=${{ matrix.kubectl }}"
@@ -121,15 +125,15 @@ jobs:
       - name: Create production docker tags
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          artifactoryTags="${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }},${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.allVersionsTag}}"
-          dockerhubTags="octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }},octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
+          artifactoryTags="$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.tagVersion }},$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.allVersionsTag}}"
+          dockerhubTags="$DockerHubImagePath:${{ steps.createTagVersion.outputs.tagVersion }},$DockerHubImagePath:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
 
 
           kubernetesVersion="${{ matrix.kubectl }}"
           if [[ "${{ needs.versions.outputs.latestVersion }}" == "${{ steps.kubernetes-version.outputs.kubernetesVersion }}" ]]
             then
-            artifactoryTags="$artifactoryTags,${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:latest"
-            dockerhubTags="$dockerhubTags,octopusdeploy/kubernetes-agent-tools-base:latest"
+            artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:latest"
+            dockerhubTags="$dockerhubTags,$DockerHubImagePath:latest"
           fi
 
           dockerTags="$artifactoryTags,$dockerhubTags"
