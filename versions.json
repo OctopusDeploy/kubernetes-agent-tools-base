@@ -14,5 +14,9 @@
         ]
     },
     "latest": "1.30",
-    "revision": 1
+    "revision": 1,
+    "deprecatedKubectlVersions": {
+        "1.26": "1.26",
+        "1.27": "1.27"
+    }
 }

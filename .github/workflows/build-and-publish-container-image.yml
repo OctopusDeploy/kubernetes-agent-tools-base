@@ -93,7 +93,7 @@ jobs:
           echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
           echo "tagVersion=$tagVersion";
 
-          allVersionsTag="${{ matrix.kubectl}}-${{ matrix.helm}}-${{matrix.powershell}}$revision$preRelease"
+          allVersionsTag="kube${{ matrix.kubectl}}-helm${{ matrix.helm}}-pwsh${{matrix.powershell}}$revision$preRelease"
           echo "allVersionsTag=$allVersionsTag" >> $GITHUB_OUTPUT;
           echo "allVersionsTag=$allVersionsTag";
 
