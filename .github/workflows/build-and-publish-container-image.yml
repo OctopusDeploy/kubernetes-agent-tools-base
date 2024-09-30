@@ -31,14 +31,14 @@ jobs:
           latestVersion=$(jq -r -c .latest versions.json)
           revision=$(jq -r -c .revision versions.json)
 
-          echo 'tools=$toolsVersions' >> $GITHUB_OUTPUT
-          echo 'tools=$toolsVersions'
+          echo "tools=$toolsVersions" >> $GITHUB_OUTPUT
+          echo "tools=$toolsVersions"
 
-          echo 'latest=$latestVersion' >> $GITHUB_OUTPUT
-          echo 'latest=$latestVersion'
+          echo "latest=$latestVersion" >> $GITHUB_OUTPUT
+          echo "latest=$latestVersion"
 
-          echo 'revision=$revision' >> $GITHUB_OUTPUT
-          echo 'revision=$revision'
+          echo "revision=$revision" >> $GITHUB_OUTPUT
+          echo "revision=$revision"
 
       - name: "Confirm"
         run: |
