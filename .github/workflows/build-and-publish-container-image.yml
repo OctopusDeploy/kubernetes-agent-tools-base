@@ -40,12 +40,6 @@ jobs:
           echo "revision=$revision" >> $GITHUB_OUTPUT
           echo "revision=$revision"
 
-      - name: "Confirm"
-        run: |
-          echo "${{ steps.versions.outputs.tools }}"
-          echo "${{ steps.versions.outputs.latest }}"
-          echo "${{ steps.versions.outputs.revision}}"
-
   build:
     runs-on: ubuntu-latest
     needs: versions
@@ -93,13 +87,13 @@ jobs:
             preRelease="-${{steps.branch_names.outputs.branch_name}}-$(date +'%Y%m%d%H%M%S')"
           fi
 
-          revision="-${{ needs.versions.outputs.revision }}"
+          revision="-r${{ needs.versions.outputs.revision }}"
 
           tagVersion="${kubernetesVersion%'.'*}$revision$preRelease";
           echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
           echo "tagVersion=$tagVersion";
 
-          allVersionsTag="${{ matrix.kubectl}}-${{ matrix.helm}}-${{matrix.powershell}}$revision"
+          allVersionsTag="${{ matrix.kubectl}}-${{ matrix.helm}}-${{matrix.powershell}}$revision$preRelease"
           echo "allVersionsTag=$allVersionsTag" >> $GITHUB_OUTPUT;
           echo "allVersionsTag=$allVersionsTag";
 
