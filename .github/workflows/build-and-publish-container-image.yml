@@ -15,9 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     outputs:
-      kubectlVersions: ${{ steps.versions.outputs.kubectl }}
-      helmVersions: ${{ steps.versions.outputs.helm }}
-      powershellVersions: ${{ steps.versions.outputs.powershell }}
+      toolsVersions: ${{ steps.versions.outputs.tools }}
       latestVersion: ${{ steps.versions.outputs.latest }}
       revision: ${{ steps.versions.outputs.revision}}
 
@@ -29,20 +27,12 @@ jobs:
       - name: "Parse versions.json"
         id: versions
         run: |
-          kubectlVersions=$(jq -r -c .tools.kubectl versions.json)
-          helmVersions=$(jq -r -c .tools.helm versions.json)
-          powershellVersions=$(jq -r -c .tools.powershell versions.json)
+          toolsVersions=$(jq -r -c .tools versions.json)
           latestVersion=$(jq -r -c .latest versions.json)
           revision=$(jq -r -c .revision versions.json)
 
-          echo 'kubectl=$kubectlVersions' >> "$GITHUB_OUTPUT"
-          echo "kubectl=$kubectlVersions"
-
-          echo 'helm=$helmVersions' >> "$GITHUB_OUTPUT"
-          echo "helm=$helmVersions"
-
-          echo 'powershell=$powershellVersions' >> "$GITHUB_OUTPUT"
-          echo "powershell=$powershellVersions"
+          echo 'tools=$toolsVersions' >> "$GITHUB_OUTPUT"
+          echo "tools=$toolsVersions"
 
           echo 'latest=$latestVersion' >> "$GITHUB_OUTPUT"
           echo "latest=$latestVersion"
@@ -54,17 +44,14 @@ jobs:
     runs-on: ubuntu-latest
     needs: versions
     strategy:
-      matrix:
-        kubectlVersion: ${{ fromJSON(needs.versions.outputs.kubectlVersions) }}
-        helmVersion: ${{ fromJSON(needs.versions.outputs.helmVersions) }}
-        powershellVersion: ${{ fromJSON(needs.versions.outputs.powershellVersions) }}
+      matrix: ${{ fromJSON(needs.versions.outputs.toolsVersions) }}
 
     steps:
       - name: Log Inputs
         run: |
-          echo "Kubectl Version: ${{ matrix.kubectlVersion }}"
-          echo "Helm Version: ${{ matrix.helmVersion }}"
-          echo "Powershell Version: ${{matrix.powershellVersion}}"
+          echo "Kubectl Version: ${{ matrix.kubectl }}"
+          echo "Helm Version: ${{ matrix.helm }}"
+          echo "Powershell Version: ${{ matrix.powershell }}"
 
       - uses: actions/checkout@v4
         with:
@@ -94,7 +81,7 @@ jobs:
 
       - name: Create Tag Version
         run: |
-          kubernetesVersion="${{ matrix.kubectlVersion }}"
+          kubernetesVersion="${{ matrix.kubectl }}"
           if [[ "${{steps.branch_names.outputs.branch_name}}" != "main" ]]
             then
             preRelease="-${{steps.branch_names.outputs.branch_name}}-$(date +'%Y%m%d%H%M%S')"
@@ -106,7 +93,7 @@ jobs:
           echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
           echo "tagVersion=$tagVersion";
 
-          allVersionsTag="${{ matrix.kubectlVersion}}-${{ matrix.helmVersion}}-${{matrix.powershellVersion}}$revision"
+          allVersionsTag="${{ matrix.kubectl}}-${{ matrix.helm}}-${{matrix.powershell}}$revision"
           echo "allVersionsTag=$allVersionsTag" >> $GITHUB_OUTPUT;
           echo "allVersionsTag=$allVersionsTag";
 
@@ -120,9 +107,9 @@ jobs:
           tags: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }},${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
           platforms: linux/amd64,linux/arm64
           build-args: |
-            "KUBECTL_VERSION=${{ matrix.kubectlVersion }}"
-            "HELM_VERSION=${{ matrix.helmVersion }}"
-            "POWERSHELL_VERSION=${{ matrix.powershellVersion }}"
+            "KUBECTL_VERSION=${{ matrix.kubectl }}"
+            "HELM_VERSION=${{ matrix.helm }}"
+            "POWERSHELL_VERSION=${{ matrix.powershell }}"
 
       - name: Create production docker tags
         if: ${{ github.ref == 'refs/heads/main' }}
@@ -131,7 +118,7 @@ jobs:
           dockerhubTags="octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }},octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
 
 
-          kubernetesVersion="${{ matrix.kubectlVersion }}"
+          kubernetesVersion="${{ matrix.kubectl }}"
           if [[ "${{ needs.versions.outputs.latestVersion }}" == "${kubernetesVersion%'.'*}" ]]
             then
             artifactoryTags="$artifactoryTags,${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:latest"
@@ -151,6 +138,6 @@ jobs:
           tags: ${{ steps.createProductionDockerTags.outputs.dockerTags }}
           platforms: linux/amd64,linux/arm64
           build-args: |
-            "KUBECTL_VERSION=${{ matrix.kubectlVersion }}"
-            "HELM_VERSION=${{ matrix.helmVersion }}"
-            "POWERSHELL_VERSION=${{ matrix.powershellVersion }}"
+            "KUBECTL_VERSION=${{ matrix.kubectl }}"
+            "HELM_VERSION=${{ matrix.helm }}"
+            "POWERSHELL_VERSION=${{ matrix.powershell }}"
