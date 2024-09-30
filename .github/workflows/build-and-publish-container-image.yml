@@ -10,6 +10,10 @@ on:
     paths:
       - versions.json
 
+env:
+  ArtifactoryImagePath: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base"
+  DockerHubImagePath: "octopusdeploy/kubernetes-agent-tools-base"
+
 jobs:
   versions:
     runs-on: ubuntu-latest
@@ -45,10 +49,6 @@ jobs:
     needs: versions
     strategy:
       matrix: ${{ fromJSON(needs.versions.outputs.toolsVersions) }}
-
-    env:
-      ArtifactoryImagePath: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base"
-      DockerHubImagePath: "octopusdeploy/kubernetes-agent-tools-base"
 
     steps:
       - name: Log Inputs
@@ -87,7 +87,9 @@ jobs:
         id: kubernetes-version
         run: |
           kubectlVersion="${{ matrix.kubectl }}"
-          echo "kubernetesVersion=${kubernetesVersion%'.'*}" >> $GITHUB_OUTPUT
+          kubeVersion="${kubernetesVersion%'.'*}"
+          echo "kubernetesVersion=$kubeVersion" >> $GITHUB_OUTPUT
+          echo "kubeVersion=$kubeVersion"
 
       - name: Create Tag Version
         run: |
@@ -115,7 +117,7 @@ jobs:
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: "$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.tagVersion }},$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
+          tags: "${{ env.ArtifactoryImagePath }}:${{ steps.createTagVersion.outputs.tagVersion }},${{ env.ArtifactoryImagePath }}:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
           platforms: linux/amd64,linux/arm64
           build-args: |
             "KUBECTL_VERSION=${{ matrix.kubectl }}"
