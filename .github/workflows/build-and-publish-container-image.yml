@@ -27,7 +27,7 @@ jobs:
       - name: "Parse versions.json"
         id: versions
         run: |
-          toolsVersions=$(jq -r -c .tools versions.json)
+          toolsVersions=$(jq -c .tools versions.json)
           latestVersion=$(jq -r -c .latest versions.json)
           revision=$(jq -r -c .revision versions.json)
 
