@@ -31,6 +31,8 @@ jobs:
           latestVersion=$(jq -r -c .latest versions.json)
           revision=$(jq -r -c .revision versions.json)
 
+          toolsVersions=${toolsVersions//\"/\\\"}
+
           echo 'tools=$toolsVersions' >> "$GITHUB_OUTPUT"
           echo "tools=$toolsVersions"
 
