@@ -36,19 +36,28 @@ jobs:
           revision=$(jq -r -c .revision versions.json)
 
           echo 'kubectl=$kubectlVersions' >> "$GITHUB_OUTPUT"
+          echo "kubectl=$kubectlVersions"
+
           echo 'helm=$helmVersions' >> "$GITHUB_OUTPUT"
+          echo "helm=$helmVersions"
+
           echo 'powershell=$powershellVersions' >> "$GITHUB_OUTPUT"
+          echo "powershell=$powershellVersions"
+
           echo 'latest=$latestVersion' >> "$GITHUB_OUTPUT"
+          echo "latest=$latestVersion"
+
           echo 'revision=$revision' >> "$GITHUB_OUTPUT"
+          echo "revision=$revision"
 
   build:
     runs-on: ubuntu-latest
     needs: versions
     strategy:
       matrix:
-        kubectlVersion: ${{ fromJson(needs.versions.outputs.kubectlVersions)}}
-        helmVersion: ${{ fromJson(needs.versions.outputs.helmVersions)}}
-        powershellVersion: ${{ fromJson(needs.versions.outputs.powershellVersions)}}
+        kubectlVersion: ${{ fromJson(needs.versions.outputs.kubectlVersions) }}
+        helmVersion: ${{ fromJson(needs.versions.outputs.helmVersions) }}
+        powershellVersion: ${{ fromJson(needs.versions.outputs.powershellVersions) }}
 
     steps:
       - name: Log Inputs
