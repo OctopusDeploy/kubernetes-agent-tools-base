@@ -87,7 +87,7 @@ jobs:
         id: kubernetes-version
         run: |
           kubectlVersion="${{ matrix.kubectl }}"
-          kubeVersion="${kubernetesVersion%'.'*}"
+          kubeVersion="${kubectlVersion%'.'*}"
           echo "kubernetesVersion=$kubeVersion" >> $GITHUB_OUTPUT
           echo "kubeVersion=$kubeVersion"
 
