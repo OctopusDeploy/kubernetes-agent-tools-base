@@ -55,9 +55,9 @@ jobs:
     needs: versions
     strategy:
       matrix:
-        kubectlVersion: ${{ fromJson(needs.versions.outputs.kubectlVersions) }}
-        helmVersion: ${{ fromJson(needs.versions.outputs.helmVersions) }}
-        powershellVersion: ${{ fromJson(needs.versions.outputs.powershellVersions) }}
+        kubectlVersion: ${{ fromJSON(needs.versions.outputs.kubectlVersions) }}
+        helmVersion: ${{ fromJSON(needs.versions.outputs.helmVersions) }}
+        powershellVersion: ${{ fromJSON(needs.versions.outputs.powershellVersions) }}
 
     steps:
       - name: Log Inputs
