@@ -33,7 +33,7 @@ jobs:
         run: |
           toolsVersions=$(jq -c .tools versions.json)
           latestVersion=$(jq -r -c .latest versions.json)
-          revision=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 4)
+          revision=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 6)
 
           echo "tools=$toolsVersions" >> $GITHUB_OUTPUT
           echo "tools=$toolsVersions"
@@ -103,7 +103,7 @@ jobs:
           fi
 
           tagVersion="$kubernetesVersion$revision$preRelease";
-          
+
           echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
           echo "tagVersion=$tagVersion";
 
