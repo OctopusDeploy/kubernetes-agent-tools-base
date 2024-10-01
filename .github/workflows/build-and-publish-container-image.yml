@@ -1,40 +1,65 @@
 name: Build and Push Container Image
-run-name: "Build and Push Image: Kubectl ${{ inputs.kubectl-version }}, Helm ${{ inputs.helm-version }}, Powershell ${{ inputs.powershell-version }}"
 
 on:
-  workflow_dispatch:
-    inputs:
-      kubectl-version:
-        required: true
-        type: string
-        default: "1.30.5"
-      helm-version:
-        required: true
-        type: string
-        default: "3.16.1"
-      powershell-version:
-        required: true
-        type: string
-        default: "7.4.5"
-      tag-as-latest:
-        description: "(Main only) Tag the image as latest - kubectl 1.30.x only"
-        required: true
-        type: boolean
-        default: false
+  pull_request:
+    paths:
+      - 'versions.json'
+  push:
+    branches:
+      - main
+    paths:
+      - 'versions.json'
+
+env:
+  ArtifactoryImagePath: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base"
+  DockerHubImagePath: "octopusdeploy/kubernetes-agent-tools-base"
 
 jobs:
+  versions:
+    runs-on: ubuntu-latest
+
+    outputs:
+      toolsVersions: ${{ steps.versions.outputs.tools }}
+      latestVersion: ${{ steps.versions.outputs.latest }}
+      revisionHash: ${{ steps.versions.outputs.revisionHash}}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: "Parse versions.json"
+        id: versions
+        run: |
+          toolsVersions=$(jq -c .tools versions.json)
+          latestVersion=$(jq -r -c .latest versions.json)
+          revisionHash=$(jq -r -c .revisionHash versions.json)
+
+          echo "tools=$toolsVersions" >> $GITHUB_OUTPUT
+          echo "tools=$toolsVersions"
+
+          echo "latest=$latestVersion" >> $GITHUB_OUTPUT
+          echo "latest=$latestVersion"
+
+          echo "revisionHash=$revisionHash" >> $GITHUB_OUTPUT
+          echo "revisionHash=$revisionHash"
+
   build:
     runs-on: ubuntu-latest
+    needs: versions
+    strategy:
+      matrix: ${{ fromJSON(needs.versions.outputs.toolsVersions) }}
 
     steps:
       - name: Log Inputs
         run: |
-            echo "Kubectl Version: ${{ inputs.kubectl-version }}"
-            echo "Helm Version: ${{ inputs.helm-version }}"
+          echo "Kubectl Version: ${{ matrix.kubectl }}"
+          echo "Helm Version: ${{ matrix.helm }}"
+          echo "Powershell Version: ${{ matrix.powershell }}"
 
       - uses: actions/checkout@v4
         with:
-            fetch-depth: 0
+          fetch-depth: 0
 
       - name: Get branch names
         id: branch_names
@@ -58,41 +83,63 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Create Tag Version
+      - name: Get Kubernetes Version
+        id: kubernetes-version
         run: |
-          fullVersion="${{ inputs.kubectl-version }}"
+          kubectlVersion="${{ matrix.kubectl }}"
+          kubeVersion="${kubectlVersion%'.'*}"
+          echo "kubernetesVersion=$kubeVersion" >> $GITHUB_OUTPUT
+          echo "kubeVersion=$kubeVersion"
+
+      - name: Create tags
+        run: |
+          kubernetesVersion="${{ steps.kubernetes-version.outputs.kubernetesVersion }}"
+          revisionHash="-${{ needs.versions.outputs.revisionHash }}"
+
           if [[ "${{steps.branch_names.outputs.branch_name}}" != "main" ]]
             then
             preRelease="-${{steps.branch_names.outputs.branch_name}}-$(date +'%Y%m%d%H%M%S')"
           fi
 
-          tagVersion="${fullVersion%'.'*}$preRelease";
-          echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
-          echo "tagVersion=$tagVersion";
-        id: createTagVersion
-      
+          # The short tag is just `1.30` (if pre-release, contains full pre-release string)
+          shortTag="$kubernetesVersion$preRelease"
+          echo "shortTag=$shortTag" >> $GITHUB_OUTPUT;
+          echo "shortTag=$shortTag";
+
+          # Revisioned short tag contains the 6 char revision hash e.g. `1.30-Df8l2d` (plus pre-release, if pre-release)
+          revisionedShortTag="$kubernetesVersion$revisionHash$preRelease"
+          echo "revisionedShortTag=$revisionedShortTag" >> $GITHUB_OUTPUT;
+          echo "revisionedShortTag=$revisionedShortTag";
+
+          # The all versions tag contains all the versions of the main tooling, plus revision hash and pre-release
+          allVersionsTag="kube${{ matrix.kubectl}}-helm${{ matrix.helm}}-pwsh${{matrix.powershell}}$revisionHash$preRelease"
+          echo "allVersionsTag=$allVersionsTag" >> $GITHUB_OUTPUT;
+          echo "allVersionsTag=$allVersionsTag";
+        id: create-tags
+
       - name: Build and push for test
         if: ${{ github.ref != 'refs/heads/main' }}
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }}"
+          tags: "${{ env.ArtifactoryImagePath }}:${{ steps.create-tags.outputs.shortTag }},${{ env.ArtifactoryImagePath }}:${{ steps.create-tags.outputs.revisionedShortTag}},${{ env.ArtifactoryImagePath }}:${{ steps.create-tags.outputs.allVersionsTag}}"  
           platforms: linux/amd64,linux/arm64
           build-args: |
-            "KUBECTL_VERSION=${{ inputs.kubectl-version }}"
-            "HELM_VERSION=${{ inputs.helm-version }}"
-            "POWERSHELL_VERSION=${{ inputs.powershell-version }}"
+            "KUBECTL_VERSION=${{ matrix.kubectl }}"
+            "HELM_VERSION=${{ matrix.helm }}"
+            "POWERSHELL_VERSION=${{ matrix.powershell }}"
 
       - name: Create production docker tags
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          artifactoryTags="${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }}"
-          dockerhubTags="octopusdeploy/kubernetes-agent-tools-base:${{ steps.createTagVersion.outputs.tagVersion }}"
+          artifactoryTags="$ArtifactoryImagePath:${{ steps.create-tags.outputs.shortTag }},$ArtifactoryImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$ArtifactoryImagePath:${{ steps.create-tags.outputs.allVersionsTag}}"
+          dockerhubTags="$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }},$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$DockerHubImagePath:${{ steps.create-tags.outputs.allVersionsTag}}" 
 
-          if [[ "${{ inputs.tag-as-latest }}" == "true" ]]
+          kubernetesVersion="${{ matrix.kubectl }}"
+          if [[ "${{ needs.versions.outputs.latestVersion }}" == "${{ steps.kubernetes-version.outputs.kubernetesVersion }}" ]]
             then
-            artifactoryTags="$artifactoryTags,${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base:latest"
-            dockerhubTags="$dockerhubTags,octopusdeploy/kubernetes-agent-tools-base:latest"
+            artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:latest"
+            dockerhubTags="$dockerhubTags,$DockerHubImagePath:latest"
           fi
 
           dockerTags="$artifactoryTags,$dockerhubTags"
@@ -100,7 +147,6 @@ jobs:
           echo "dockerTags=$dockerTags";
         id: createProductionDockerTags
 
-    
       - name: Build and push for production
         if: ${{ github.ref == 'refs/heads/main' }}
         uses: docker/build-push-action@v5
@@ -109,6 +155,6 @@ jobs:
           tags: ${{ steps.createProductionDockerTags.outputs.dockerTags }}
           platforms: linux/amd64,linux/arm64
           build-args: |
-            "KUBECTL_VERSION=${{ inputs.kubectl-version }}"
-            "HELM_VERSION=${{ inputs.helm-version }}"
-            "POWERSHELL_VERSION=${{ inputs.powershell-version }}"
+            "KUBECTL_VERSION=${{ matrix.kubectl }}"
+            "HELM_VERSION=${{ matrix.helm }}"
+            "POWERSHELL_VERSION=${{ matrix.powershell }}"
