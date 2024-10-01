@@ -4,24 +4,27 @@ This repo produces a container image that is used by the Kubernetes Agent to exe
 
 Summary: The image packages `kubectl`, `helm`, `powershell` and `curl` on the base image `mcr.microsoft.com/dotnet/runtime-deps`.
 
-# Building and Pushing a image
-Currently this is mostly a manual process which involves dispatching `build-and-publish-container-image` github workflow.
-The steps are as follows:
-1. Navigate to the ["build and publish container image" workflow](https://github.com/OctopusDeploy/kubernetes-agent-tools-base/actions/workflows/build-and-publish-container-image.yml) 
-2. Click "Run workflow" 
-3. Configure the workflow as follows 
-* Branch: main or your desired branch - Only main will be pushed to dockerhub
-* kubectl-version: This follows the Kubernetes versioning - values can be found on the [K8s git repo](https://github.com/kubernetes/kubernetes/tags)
-* helm-version: This value will depend on the version of kubectl you have chosen, see the [helm compatibility table](https://helm.sh/docs/topics/version_skew/#supported-version-skew) to get the value.
-* powershell-version: See the [Powershell github repo](https://github.com/PowerShell/PowerShell/tags) for a value or just use the default.
-* tag-as-latest: If running against main and checked this will also push the image with the latest tag as well as the version tag.
-4. Click "Run workflow"
+## Updating versions
 
-# Accessing the image 
-Mainline builds will be pushed to both dockerhub with the name `octopusdeploy/kubernetes-agent-tools-base:{Kubectll Minor Version}.{Kubectl Minor Version}`
-Example Dockerhub: `octopusdeploy/kubernetes-agent-tools-base:1.29`  
+In the root of the directory there is a file, `versions.json` which contains information about what versions of Kubectl (and thus Kubernetes), Helm & Powershell are used to generate the images.
+Under the `tools` object, there are 3 fields with versions arrays (`kubectl`,`helm`,`powershell`), which are used in a matrix to generate the images.
 
-Branch builds will only be pushed the Octopus' Artifactory instance with a prerelease version `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:{Kubectll Minor Version}.{Kubectl Minor Version}-{Sanitized Branch Name}-{Date}`
-Example: `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:1.29-tl-push-to-dockerhub-20240424041854`
+There is also a `latest` field that represents the kubernetes version that will be tagged with the `latest` tag.
+The `revision` field is used to distinguish between versions of the image.
+
+When updating the images, the `revision` should be continually incremented.
+
+### Tags
+
+There are 3 tags being published
+
+- `latest` - Assigned to the highest version of the Kubernetes supported by the Kubernetes agent.
+- `{Kubectl Major Version}.{Kubectl Minor Version}-r{Revision}` - For each `kubectl` version, there will be an image with the Kubernetes major & minor version and revision. Example: `1.31-r6`.
+- `kube{Kubectl Version}-helm{Helm Version}-pwsh{Powershell Version}-r{Revision}` - Contains all versions of the tools plus the revision. Example `kube1.31.1-helm3.16.1-pwsh7.4.5-r4`. 
+
+### Branch builds 
+
+Branch builds will only be pushed the Octopus' Artifactory instance with a prerelease version `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:{Kubectll Minor Version}.{Kubectl Minor Version}-r{Revision}-{Sanitized Branch Name}-{Date}`
+Example: `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:1.29-r1-tl-push-to-dockerhub-20240424041854`
 
 The tags can be found from the logs in the Github action workflow under the step "Create Tag Version`
