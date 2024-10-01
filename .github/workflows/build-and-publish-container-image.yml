@@ -21,7 +21,7 @@ jobs:
     outputs:
       toolsVersions: ${{ steps.versions.outputs.tools }}
       latestVersion: ${{ steps.versions.outputs.latest }}
-      revision: ${{ steps.versions.outputs.revision}}
+      revisionHash: ${{ steps.versions.outputs.revision}}
 
     steps:
       - uses: actions/checkout@v4
@@ -33,7 +33,7 @@ jobs:
         run: |
           toolsVersions=$(jq -c .tools versions.json)
           latestVersion=$(jq -r -c .latest versions.json)
-          revision=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 6)
+          revisionHash=$(jq -r -c .revisionHash versions.json)
 
           echo "tools=$toolsVersions" >> $GITHUB_OUTPUT
           echo "tools=$toolsVersions"
@@ -41,8 +41,8 @@ jobs:
           echo "latest=$latestVersion" >> $GITHUB_OUTPUT
           echo "latest=$latestVersion"
 
-          echo "revision=$revision" >> $GITHUB_OUTPUT
-          echo "revision=$revision"
+          echo "revisionHash=$revisionHash" >> $GITHUB_OUTPUT
+          echo "revisionHash=$revisionHash"
 
   build:
     runs-on: ubuntu-latest
@@ -91,34 +91,38 @@ jobs:
           echo "kubernetesVersion=$kubeVersion" >> $GITHUB_OUTPUT
           echo "kubeVersion=$kubeVersion"
 
-      - name: Create Tag Version
+      - name: Create tags
         run: |
           kubernetesVersion="${{ steps.kubernetes-version.outputs.kubernetesVersion }}"
+          revisionHash="-${{ needs.versions.outputs.revisionHash }}"
 
           if [[ "${{steps.branch_names.outputs.branch_name}}" != "main" ]]
             then
             preRelease="-${{steps.branch_names.outputs.branch_name}}-$(date +'%Y%m%d%H%M%S')"
-          else
-            revision="-${{ needs.versions.outputs.revision }}"
           fi
 
-          tagVersion="$kubernetesVersion$revision$preRelease";
+          # The short tag is just `1.30` (if pre-release, contains full pre-release string)
+          shortTag="$kubernetesVersion$preRelease"
+          echo "shortTag=$shortTag" >> $GITHUB_OUTPUT;
+          echo "shortTag=$shortTag";
 
-          echo "tagVersion=$tagVersion" >> $GITHUB_OUTPUT;
-          echo "tagVersion=$tagVersion";
+          # Revisioned short tag contains the 6 char revision hash e.g. `1.30-Df8l2d` (plus pre-release, if pre-release)
+          revisionedShortTag="$kubernetesVersion$revisionHash$preRelease"
+          echo "revisionedShortTag=$revisionedShortTag" >> $GITHUB_OUTPUT;
+          echo "revisionedShortTag=$revisionedShortTag";
 
-          allVersionsTag="kube${{ matrix.kubectl}}-helm${{ matrix.helm}}-pwsh${{matrix.powershell}}$revision$preRelease"
+          # The all versions tag contains all the versions of the main tooling, plus revision hash and pre-release
+          allVersionsTag="kube${{ matrix.kubectl}}-helm${{ matrix.helm}}-pwsh${{matrix.powershell}}$revisionHash$preRelease"
           echo "allVersionsTag=$allVersionsTag" >> $GITHUB_OUTPUT;
           echo "allVersionsTag=$allVersionsTag";
-
-        id: createTagVersion
+        id: create-tags
 
       - name: Build and push for test
         if: ${{ github.ref != 'refs/heads/main' }}
         uses: docker/build-push-action@v5
         with:
           push: true
-          tags: "${{ env.ArtifactoryImagePath }}:${{ steps.createTagVersion.outputs.tagVersion }},${{ env.ArtifactoryImagePath }}:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
+          tags: "${{ env.ArtifactoryImagePath }}:${{ steps.create-tags.outputs.shortTag }},${{ env.ArtifactoryImagePath }}:${{ steps.create-tags.outputs.revisionedShortTag}},${{ env.ArtifactoryImagePath }}:${{ steps.create-tags.outputs.allVersionsTag}}"  
           platforms: linux/amd64,linux/arm64
           build-args: |
             "KUBECTL_VERSION=${{ matrix.kubectl }}"
@@ -128,9 +132,8 @@ jobs:
       - name: Create production docker tags
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          artifactoryTags="$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.tagVersion }},$ArtifactoryImagePath:${{ steps.createTagVersion.outputs.allVersionsTag}}"
-          dockerhubTags="$DockerHubImagePath:${{ steps.createTagVersion.outputs.tagVersion }},$DockerHubImagePath:${{ steps.createTagVersion.outputs.allVersionsTag}}" 
-
+          artifactoryTags="$ArtifactoryImagePath:${{ steps.create-tags.outputs.shortTag }},$ArtifactoryImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$ArtifactoryImagePath:${{ steps.create-tags.outputs.allVersionsTag}}"
+          dockerhubTags="$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }},$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$DockerHubImagePath:${{ steps.create-tags.outputs.allVersionsTag}}" 
 
           kubernetesVersion="${{ matrix.kubectl }}"
           if [[ "${{ needs.versions.outputs.latestVersion }}" == "${{ steps.kubernetes-version.outputs.kubernetesVersion }}" ]]
