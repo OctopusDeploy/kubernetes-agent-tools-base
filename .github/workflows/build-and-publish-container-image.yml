@@ -3,12 +3,12 @@ name: Build and Push Container Image
 on:
   pull_request:
     paths:
-      - versions.json
+      - 'versions.json'
   push:
     branches:
       - main
     paths:
-      - versions.json
+      - 'versions.json'
 
 env:
   ArtifactoryImagePath: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base"
