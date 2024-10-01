@@ -13,15 +13,28 @@ There is also a `latest` field that represents the kubernetes version that will 
 
 ### Tags
 
-There are 3 tags being published
+There are 4 tags being published
 
 - `latest` - Assigned to the highest version of the Kubernetes supported by the Kubernetes agent.
-- `{Kubectl Major Version}.{Kubectl Minor Version}-{Random6Chars}` - For each `kubectl` version, there will be an image with the Kubernetes major & minor version and random 6 char hash. Example: `1.31-X5msD0`.
-- `kube{Kubectl Version}-helm{Helm Version}-pwsh{Powershell Version}-{Random6Chars}` - Contains all versions of the tools plus the revision. Example `kube1.31.1-helm3.16.1-pwsh7.4.5-X5msD0`. 
+- `{Kubectl Major Version}.{Kubectl Minor Version}` - For each `kubectl` version, there will be an image with the Kubernetes major & minor version. Example: `1.31`.
+- `{Kubectl Major Version}.{Kubectl Minor Version}-{Random6Chars}` - For each `kubectl` version, there will be an image with the Kubernetes major & minor version and random 6 char revision hash. Example: `1.31-X5msD0`.
+- `kube{Kubectl Version}-helm{Helm Version}-pwsh{Powershell Version}-{Random6Chars}` - Contains all versions of the tools plus the revision hash. Example `kube1.31.1-helm3.16.1-pwsh7.4.5-X5msD0`. 
+
+### What is the `revisionHash`?
+
+The revision hash is a "cache-busting" mechanism to allow the Kubernetes agent to get an updated version of the tools container image without needing to set the `imagePullPolicy` to `Always`. Because Kubernetes will cache the image on the node(s), it's possible that the image does not get re-acquired when there is a tooling update.
+
+#### Generating a new `revisionHash`
+
+As the `revisionHash` is used in the docker tag, which are case-sensitive, the following command generates a unique 6 char hash.
+
+```bash
+tr -dc A-Za-z0-9 </dev/urandom | head -c 6; echo
+```
 
 ### Branch builds 
 
-Branch builds will only be pushed the Octopus' Artifactory instance with a prerelease version `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:{Kubectll Minor Version}.{Kubectl Minor Version}-{Sanitized Branch Name}-{Date}`
-Example: `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:1.29-tl-push-to-dockerhub-20240424041854`
+Branch builds will only be pushed the Octopus' Artifactory instance with a prerelease version `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:{Kubectll Minor Version}.{Kubectl Minor Version}-{Random6Chars}-{Sanitized Branch Name}-{Date}`
+Example: `{artifactory-hostname}/octopusdeploy/kubernetes-agent-tools-base:1.29-X5msD0-tl-push-to-dockerhub-20240424041854`
 
 The tags can be found from the logs in the Github action workflow under the step "Create Tag Version`
