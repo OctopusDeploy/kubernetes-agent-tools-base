@@ -17,7 +17,7 @@
     "revisionHash": "vPd72i",
     "deprecations": {
         "1.26": {
-            "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f"
+            "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
         },
         "1.27": {
             "latestTag": "1.27@sha256:9d1ce87c37a33582bd3bb0b2e2d54d7a6bc0e71d659a1132acd3893c9645a507"
