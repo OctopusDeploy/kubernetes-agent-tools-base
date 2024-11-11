@@ -22,7 +22,7 @@
             "latestTag": "1.27@sha256:9d1ce87c37a33582bd3bb0b2e2d54d7a6bc0e71d659a1132acd3893c9645a507"
         },
         "1.28": {
-            "latestTag": "1.28sha256:c2a7c7d230b2c959c4228f0860d5d6dca143a38fa037911fc5dd0319a0cf1ed0"
+            "latestTag": "1.28@sha256:c2a7c7d230b2c959c4228f0860d5d6dca143a38fa037911fc5dd0319a0cf1ed0"
         }
     }
 }
