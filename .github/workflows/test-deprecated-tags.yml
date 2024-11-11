@@ -21,7 +21,10 @@ jobs:
       - name: parse versions.json
         id: tags
         run: |
-          deprecatedFinalTags=$(jq -c "[.deprecations | to_entries |  .[].value.finalTag]" versions.json)
+          echo $(jq -c "[.deprecations | to_entries]" versions.json)
+          echo $(jq -c "[.deprecations | to_entries | .[]]" versions.json)
+          echo $(jq -c "[.deprecations | to_entries | .[].value]" versions.json)
+          deprecatedFinalTags=$(jq -c "[.deprecations | to_entries | .[].value.finalTag]" versions.json)
           echo "finalTags=$deprecatedFinalTags" >> $GITHUB_OUTPUT
           echo "finalTags=$deprecatedFinalTags"
 
