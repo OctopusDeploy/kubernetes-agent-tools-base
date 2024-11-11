@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
     - versions.json
+    - .github/workflows/test-deprecated-tags.yml
 
 jobs:
   get_deprecated_tags:
