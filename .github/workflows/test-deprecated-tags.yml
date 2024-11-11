@@ -1,3 +1,4 @@
+name: Test deprecated versions latest tags
 on:
   workflow_dispatch:
   pull_request:
@@ -7,11 +8,11 @@ on:
 
 jobs:
   get_deprecated_tags:
-    name: Get deprecated version final tags
+    name: Get deprecated version latest tags
     runs-on: ubuntu-latest
     
     outputs:
-      deprecatedFinalTags: ${{ steps.tags.outputs.finalTags }}
+      deprecatedVersionLatestTags: ${{ steps.tags.outputs.latestTags }}
       
     steps:
       - uses: actions/checkout@v4
@@ -21,12 +22,9 @@ jobs:
       - name: parse versions.json
         id: tags
         run: |
-          echo $(jq -c "[.deprecations | to_entries]" versions.json)
-          echo $(jq -c "[.deprecations | to_entries | .[]]" versions.json)
-          echo $(jq -c "[.deprecations | to_entries | .[].value]" versions.json)
-          deprecatedFinalTags=$(jq -c "[.deprecations | to_entries | .[].value.finalTag]" versions.json)
-          echo "finalTags=$deprecatedFinalTags" >> $GITHUB_OUTPUT
-          echo "finalTags=$deprecatedFinalTags"
+          deprecatedLatestTags=$(jq -c "[.deprecations | to_entries | .[].value.latestTag]" versions.json)
+          echo "latestTags=$deprecatedLatestTags" >> $GITHUB_OUTPUT
+          echo "latestTags=$deprecatedLatestTags"
 
   test_docker_pull:
     name: Test via docker pull
@@ -34,13 +32,13 @@ jobs:
     needs: get_deprecated_tags
     strategy:
       matrix: 
-        deprecatedTag: ${{ fromJSON(needs.get_deprecated_tags.outputs.deprecatedFinalTags) }}
+        latestTag: ${{ fromJSON(needs.get_deprecated_tags.outputs.deprecatedVersionLatestTags) }}
 
     steps:
       - name: Log Inputs
         run: |
-          echo "Deprecated Tag: ${{ matrix.deprecatedTag }}"
+          echo "Deprecated Version Latest Tag: ${{ matrix.latestTag }}"
 
       - name: Attempt Docker Pull
         run: |
-          docker pull octopusdeploy/kubernetes-agent-tools-base:${{matrix.deprecatedTag}}
+          docker pull octopusdeploy/kubernetes-agent-tools-base:${{matrix.latestTag}}
