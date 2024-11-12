@@ -1,0 +1,68 @@
+{  
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "description": "kubernetes-agent-tools-base versions",
+  "type": "object",
+  "properties": {
+    "tools": {
+      "type": "object",
+      "properties": {
+        "kubectl": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "helm": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "powershell": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "kubectl",
+        "helm",
+        "powershell"
+      ]
+    },
+    "latest": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4
+    },
+    "revisionHash": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 6
+    },
+    "deprecations": {
+      "type": "object",
+      "pattenProperties": {
+        ".*": {
+          "type": "object",
+          "properties": {
+            "latestTag": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "latestTag"
+          ]
+        }
+      }
+    }
+  },
+  "required": [
+    "tools",
+    "latest",
+    "revisionHash",
+    "deprecations"
+  ]
+}
