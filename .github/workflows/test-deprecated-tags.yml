@@ -1,12 +1,26 @@
-name: Test deprecated versions latest tags
+name: Test versions.json
 on:
   workflow_dispatch:
   pull_request:
     paths:
     - versions.json
+    - versions.schema.json
     - .github/workflows/test-deprecated-tags.yml
 
 jobs:
+  validate_json:
+    name: Validate json against schema
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: pip install json-spec
+      - run: json validate --schema-file=versions.schema.json --document-file=versions.json
+
   get_deprecated_tags:
     name: Get deprecated version latest tags
     runs-on: ubuntu-latest
