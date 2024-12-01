@@ -13,7 +13,7 @@
         ]
     },
     "latest": "1.30",
-    "revisionHash": "QD5i6B",
+    "revisionHash": "EXwwIU",
     "deprecations": {
         "1.26": {
             "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
