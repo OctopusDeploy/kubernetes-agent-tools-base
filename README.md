@@ -29,7 +29,7 @@ The revision hash is a "cache-busting" mechanism to allow the Kubernetes agent t
 As the `revisionHash` is used in the docker tag, which are case-sensitive, the following command generates a unique 6 char hash.
 
 ```bash
-tr -dc A-Za-z0-9 </dev/urandom | head -c 6; echo
+LC_ALL=C tr -dc A-Za-z0-9 </dev/urandom | head -c 6; echo
 ```
 
 ### Branch builds 
