@@ -1,10 +1,10 @@
 {
   "tools": {
     "kubectl": [
-      "1.33.1",
-      "1.32.5",
-      "1.31.9",
-      "1.30.13"
+      "1.33.2",
+      "1.32.6",
+      "1.31.10",
+      "1.30.14"
     ],
     "helm": [
       "3.17.3"
@@ -14,7 +14,7 @@
     ]
   },
   "latest": "1.33",
-  "revisionHash": "bU487h",
+  "revisionHash": "R0xpeH",
   "deprecations": {
     "1.26": {
       "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
