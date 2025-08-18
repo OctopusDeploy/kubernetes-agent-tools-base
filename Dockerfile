@@ -29,6 +29,7 @@ RUN tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell
 RUN chmod +x /opt/microsoft/powershell/pwsh
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:6.0
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
 
 RUN apt update && apt install -y jq=1.6-2.1 curl
 
