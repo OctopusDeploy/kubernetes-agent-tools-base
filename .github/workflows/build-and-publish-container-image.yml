@@ -5,14 +5,14 @@ on:
     paths:
       - 'versions.json'
       - 'Dockerfile'
-      - '.github/workflows/*'
+      - '.github/workflows/build-and-publish-container-image.yml'
   push:
     branches:
       - main
     paths:
       - 'versions.json'
       - 'Dockerfile'
-      - '.github/workflows/*'
+      - '.github/workflows/build-and-publish-container-image.yml'
 
 env:
   ArtifactoryImagePath: "${{ secrets.ARTIFACTORY_DOCKER_REPO_HOSTNAME }}/octopusdeploy/kubernetes-agent-tools-base"
