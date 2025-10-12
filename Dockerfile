@@ -1,5 +1,5 @@
 # using a multi-stage dockerfile so that our resulting image is clean
-FROM debian:latest as deps
+FROM debian:latest AS deps
 
 ARG KUBECTL_VERSION
 ARG HELM_VERSION
@@ -30,7 +30,7 @@ RUN chmod +x /opt/microsoft/powershell/pwsh
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:6.0
 
-RUN apt update && apt install -y jq=1.6-2.1 curl
+RUN apt update && apt install -y jq=1.6-2.1+deb11u1 curl
 
 # copy exes from the builder container
 COPY --from=deps /bin/kubectl /bin/kubectl
