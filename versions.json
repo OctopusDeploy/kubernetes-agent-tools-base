@@ -7,14 +7,14 @@
       "1.31.13"
     ],
     "helm": [
-      "3.18.6"
+      "3.19.0"
     ],
     "powershell": [
       "7.5.3"
     ]
   },
   "latest": "1.33",
-  "revisionHash": "bvBxSk",
+  "revisionHash": "pFWEfX",
   "deprecations": {
     "1.26": {
       "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
