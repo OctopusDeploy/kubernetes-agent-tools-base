@@ -30,7 +30,7 @@ RUN chmod +x /opt/microsoft/powershell/pwsh
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:6.0
 
-RUN apt update && apt install -y jq=1.6-2.1+deb11u2 curl
+RUN apt update && apt install -y jq=1.6-2.1+deb11u1 curl
 
 # copy exes from the builder container
 COPY --from=deps /bin/kubectl /bin/kubectl
