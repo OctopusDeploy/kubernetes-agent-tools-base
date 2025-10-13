@@ -163,7 +163,7 @@ jobs:
             "HELM_VERSION=${{ matrix.helm }}"
             "POWERSHELL_VERSION=${{ matrix.powershell }}"
 
-  matrix_build_check:
+  validate_matrix_builds:
     needs: [build]
     if: always()
     runs-on: [ubuntu-latest]
