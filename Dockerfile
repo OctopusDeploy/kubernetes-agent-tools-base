@@ -30,6 +30,16 @@ RUN chmod +x /opt/microsoft/powershell/pwsh
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:6.0
 
+# Take UID/GID 999 for ourselves before installing software-properties-common. In debian 12+ it sets up systemd-journal with GID 999
+# but we want to keep 999 from older versions of our Octopus container; customers assign permissions to it.
+# If we take the GID before installing software-properties-common, systemd-journal will get 998 instead.
+RUN groupadd -g 999 octopus \
+    && useradd -m -u 999 -g octopus octopus \
+    && mkdir -p -m 0700 /run/user/999 \
+    && chown octopus:octopus /run/user/999 \
+    && echo 'octopus:265536:65536' >> /etc/subuid \
+    && echo 'octopus:265536:65536' >> /etc/subgid
+
 RUN apt update && apt install -y jq=1.6-2.1+deb11u1 curl
 
 # copy exes from the builder container
