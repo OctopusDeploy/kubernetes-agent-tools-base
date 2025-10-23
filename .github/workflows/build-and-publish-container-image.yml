@@ -166,6 +166,10 @@ jobs:
   validate_matrix_builds:
     needs: build
     runs-on: [ubuntu-latest]
+    if: ${{failure}}
     steps:
-      - name: All Builds Succeeded
-        run: echo "✅ All matrix builds completed successfully."
+      - name: Report Matrix Failure
+        run: |
+          echo "At least one matrix build failed."
+          # Explicitly exit 1 to ensure this job's status is "failure"
+          exit 1
