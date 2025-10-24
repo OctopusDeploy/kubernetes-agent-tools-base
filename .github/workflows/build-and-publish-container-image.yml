@@ -165,11 +165,15 @@ jobs:
 
   validate_matrix_builds:
     needs: build
-    runs-on: [ubuntu-latest]
-    if: ${{failure}}
+    if: ${{ always() }}    
+    runs-on: ubuntu-latest
     steps:
-      - name: Report Matrix Failure
+      - name: Non Successful Build
+        if: ${{ needs.build.result != 'success' }}
         run: |
-          echo "At least one matrix build failed."
-          # Explicitly exit 1 to ensure this job's status is "failure"
+          echo "One or more matrix jobs failed or were skipped."
           exit 1
+          
+      - name: Successful Bulld
+        if: ${{ needs.build.result == 'success' }}
+        run: echo "✅ All matrix builds were successful!"
