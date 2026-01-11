@@ -1,9 +1,9 @@
 {
   "tools": {
     "kubectl": [
-      "1.34.2",
-      "1.33.6",
-      "1.32.10"
+      "1.34.3",
+      "1.33.7",
+      "1.32.11"
     ],
     "helm": [
       "3.19.4"
@@ -13,7 +13,7 @@
     ]
   },
   "latest": "1.33",
-  "revisionHash": "4yDV22",
+  "revisionHash": "owiMLP",
   "deprecations": {
     "1.26": {
       "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
