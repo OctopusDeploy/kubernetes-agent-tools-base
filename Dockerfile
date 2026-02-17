@@ -29,6 +29,7 @@ RUN tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell
 RUN chmod +x /opt/microsoft/powershell/pwsh
 
 FROM mcr.microsoft.com/dotnet/runtime-deps:6.0
+FROM mcr.microsoft.com/dotnet/runtime-deps:8.0
 
 # Take UID/GID 999 for ourselves before installing software-properties-common. In debian 12+ it sets up systemd-journal with GID 999
 # but we want to keep 999 from older versions of our Octopus container; customers assign permissions to it.
