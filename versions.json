@@ -1,6 +1,7 @@
 {
   "tools": {
     "kubectl": [
+      "1.36.0",
       "1.35.3",
       "1.34.6",
       "1.33.10"
@@ -9,11 +10,11 @@
       "3.20.2"
     ],
     "powershell": [
-      "7.6.0"
+      "7.6.1"
     ]
   },
-  "latest": "1.34",
-  "revisionHash": "lUNwly",
+  "latest": "1.35",
+  "revisionHash": "tT2Ki6",
   "deprecations": {
     "1.26": {
       "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
