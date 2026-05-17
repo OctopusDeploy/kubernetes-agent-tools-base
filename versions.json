@@ -1,20 +1,20 @@
 {
   "tools": {
     "kubectl": [
-      "1.36.0",
-      "1.35.4",
-      "1.34.7",
-      "1.33.11"
+      "1.36.1",
+      "1.35.5",
+      "1.34.8",
+      "1.33.12"
     ],
     "helm": [
-      "3.20.2"
+      "3.21.0"
     ],
     "powershell": [
       "7.6.1"
     ]
   },
   "latest": "1.35",
-  "revisionHash": "LlhBKT",
+  "revisionHash": "FqbqFf",
   "deprecations": {
     "1.26": {
       "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
