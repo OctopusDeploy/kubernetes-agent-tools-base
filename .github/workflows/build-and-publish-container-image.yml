@@ -138,12 +138,12 @@ jobs:
           artifactoryTags="$ArtifactoryImagePath:${{ steps.create-tags.outputs.allVersionsTag}}"
           
           # do we have a short tag?
-          if [[ -n "${{ steps.create-tags.outputs.shortTag }}"]]; then
+          if [[ -n "${{ steps.create-tags.outputs.shortTag }}" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:${{ steps.create-tags.outputs.shortTag }}"
           fi
           
           # do we have a revisioned short tag?
-          if [[ -n "${{ steps.create-tags.outputs.revisionedShortTag }}"]]; then
+          if [[ -n "${{ steps.create-tags.outputs.revisionedShortTag }}" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
           fi
 
@@ -171,13 +171,13 @@ jobs:
           dockerhubTags="$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }},$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$DockerHubImagePath:${{ steps.create-tags.outputs.allVersionsTag}}" 
 
           # do we have a short tag?
-          if [[ -n "${{ steps.create-tags.outputs.shortTag }}"]]; then
+          if [[ -n "${{ steps.create-tags.outputs.shortTag }}" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:${{ steps.create-tags.outputs.shortTag }}"
             dockerhubTags="$artifactoryTags,$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }}"
           fi
           
           # do we have a revisioned short tag?
-          if [[ -n "${{ steps.create-tags.outputs.revisionedShortTag }}"]]; then
+          if [[ -n "${{ steps.create-tags.outputs.revisionedShortTag }}" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
             dockerhubTags="$artifactoryTags,$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
           fi
