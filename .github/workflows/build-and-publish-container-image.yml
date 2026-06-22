@@ -111,7 +111,7 @@ jobs:
 
           shortTag=""
           revisionedShortTag=""
-
+          
           # we only create the short tag if the helm version matches the latest helm major version
           if [[ "${{ matrix.helm }}" == "${{ needs.versions.outputs.latestHelmVersion }}*" ]]; then
             # The short tag is just `1.30` (if pre-release, contains full pre-release string)
@@ -182,7 +182,7 @@ jobs:
             dockerhubTags="$artifactoryTags,$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
           fi
 
-          #if this is the latest kubernetes version and latest helm version
+          # if this is the latest kubernetes version and latest helm version matches the latest helm major version
           if [[ "${{ needs.versions.outputs.latestVersion }}" == "${{ steps.kubernetes-version.outputs.kubernetesVersion }}" && "${{ matrix.helm }}" == "${{ needs.versions.outputs.latestHelmVersion }}*" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:latest"
             dockerhubTags="$dockerhubTags,$DockerHubImagePath:latest"
