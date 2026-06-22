@@ -7,6 +7,7 @@
       "1.33.12"
     ],
     "helm": [
+      "4.2.2",
       "3.21.2"
     ],
     "powershell": [
@@ -14,6 +15,7 @@
     ]
   },
   "latest": "1.35",
+  "latestHelm": "3",
   "revisionHash": "tT9UBk",
   "deprecations": {
     "1.26": {
