@@ -40,7 +40,7 @@ RUN groupadd -g 999 octopus \
     && echo 'octopus:265536:65536' >> /etc/subuid \
     && echo 'octopus:265536:65536' >> /etc/subgid
 
-RUN apt update && apt install -y jq=1.6-2.1+deb12u1 curl
+RUN apt update && apt install -y jq=1.6-2.1+deb12u2 curl
 
 # copy exes from the builder container
 COPY --from=deps /bin/kubectl /bin/kubectl
