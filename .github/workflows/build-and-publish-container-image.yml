@@ -167,19 +167,19 @@ jobs:
       - name: Create production docker tags
         if: ${{ github.ref == 'refs/heads/main' }}
         run: |
-          artifactoryTags="$ArtifactoryImagePath:${{ steps.create-tags.outputs.shortTag }},$ArtifactoryImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$ArtifactoryImagePath:${{ steps.create-tags.outputs.allVersionsTag}}"
-          dockerhubTags="$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }},$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag}},$DockerHubImagePath:${{ steps.create-tags.outputs.allVersionsTag}}" 
+          artifactoryTags="$ArtifactoryImagePath:${{ steps.create-tags.outputs.allVersionsTag}}"
+          dockerhubTags="$DockerHubImagePath:${{ steps.create-tags.outputs.allVersionsTag}}" 
 
           # do we have a short tag?
           if [[ -n "${{ steps.create-tags.outputs.shortTag }}" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:${{ steps.create-tags.outputs.shortTag }}"
-            dockerhubTags="$artifactoryTags,$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }}"
+            dockerhubTags="$dockerhubTags,$DockerHubImagePath:${{ steps.create-tags.outputs.shortTag }}"
           fi
           
           # do we have a revisioned short tag?
           if [[ -n "${{ steps.create-tags.outputs.revisionedShortTag }}" ]]; then
             artifactoryTags="$artifactoryTags,$ArtifactoryImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
-            dockerhubTags="$artifactoryTags,$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
+            dockerhubTags="$dockerhubTags,$DockerHubImagePath:${{ steps.create-tags.outputs.revisionedShortTag }}"
           fi
 
           # if this is the latest kubernetes version and latest helm version matches the latest helm major version
