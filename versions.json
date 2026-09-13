@@ -1,22 +1,21 @@
 {
   "tools": {
     "kubectl": [
-      "1.36.2",
-      "1.35.6",
-      "1.34.9",
-      "1.33.13"
+      "1.36.4",
+      "1.35.8",
+      "1.34.11"
     ],
     "helm": [
-      "4.2.3",
-      "3.21.3"
+      "4.2.4",
+      "3.21.4"
     ],
     "powershell": [
-      "7.6.4"
+      "7.6.6"
     ]
   },
   "latest": "1.35",
   "latestHelm": "3",
-  "revisionHash": "wdbrFp",
+  "revisionHash": "mXhcGs",
   "deprecations": {
     "1.26": {
       "latestTag": "1.26@sha256:a0892db7be9d668eceba2ce0c56ed82b2a58ff205ffea27a98e40825143b63f0"
@@ -38,6 +37,9 @@
     },
     "1.32": {
       "latestTag": "1.32@sha256:643830f096f66ee69ad0f358893fdf711f1a88f644c3eaf6d78d39fd3c4aea28"
-    }
+    },
+    "1.33": {
+      "latestTag": "1.33@sha256:1dd3310859de49ef653ad48cfc360ff1ebb44ba0334beb1fea2ef980b46620cb"
+    },
   }
 }
